@@ -1,0 +1,28 @@
+{
+	"name": "georgringer/requirement-checker",
+	"keywords": [
+		"TYPO3",
+		"extension"
+	],
+	"authors": [
+		{
+			"name": "Georg Ringer",
+			"role": "Developer"
+		}
+	],
+	"type": "typo3-cms-extension",
+	"description": "Dependencies of extensions",
+	"license": ["GPL-2.0-or-later"],
+	"require": {
+		"typo3/cms-core": "9.2.*@dev"
+	},
+	"autoload": {
+		"psr-4": {
+			"GeorgRinger\\RequirementChecker\\": "Classes"
+		}
+	},
+	"replace": {
+		"requirement_checker": "self.version",
+		"typo3-ter/requirement_checker": "self.version"
+	}
+}
