@@ -73,7 +73,10 @@ class RequirementListCommand extends Command
 
             foreach ($phpFilesOfExtension as $fileObject) {
                 $namespaces = $this->getNamespaces($fileObject->getPathname());
-                $totalNamespaces = array_merge($totalNamespaces, $namespaces);
+                $namespaces2 = $this->getNamespacesFromMakeInstance($fileObject->getContents());
+                $totalNamespaces = array_merge($totalNamespaces, $namespaces, $namespaces2);
+
+
             }
 
             $this->removeOwnNamespaces($totalNamespaces, $directory);
@@ -85,6 +88,39 @@ class RequirementListCommand extends Command
 
         }
         return $dependencies;
+    }
+
+    protected function getNamespacesFromMakeInstance(string $content): array
+    {
+        $namespaces = [];
+        $tokens = token_get_all($content);
+        foreach ($tokens as $k => $token) {
+            if (is_array($token)) {
+                if ($token[0] === T_STRING && $token[1] === 'makeInstance') {
+                    $found = false;
+                    $j = $k + 3;
+                    for ($i = $k + 1; $i < $j; $i++) {
+                        if ($found || !is_array($tokens[$i])) {
+                            continue;
+                        }
+                        if (is_array($tokens[$i]) && $tokens[$i][0] === T_NS_SEPARATOR) {
+                            $found = true;
+                            $path = [];
+
+                            $n = $i + 1;
+                            while ($tokens[$n][0] !== T_PAAMAYIM_NEKUDOTAYIM) {
+                                $path[] = $tokens[$n][1];
+                                $n++;
+                            }
+
+                            $namespaces[] = implode('', $path);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $namespaces;
     }
 
     protected function simplifyNamespaceList(array $namespaces)
